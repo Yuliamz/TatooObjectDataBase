@@ -1,13 +1,31 @@
-CREATE OR REPLACE TABLE TATOO
-(
-       codigo                    NUMBER not null,
-       nombre                    VARCHAR2(20) not null,
+--ESPECIFICACION DEL OBJETO
+CREATE OR REPLACE TYPE OBJECT_TATOO AS OBJECT(
+       codigo                    NUMBER,
+       nombre                    VARCHAR2(20),
        descripcion               VARCHAR2(150),
-       ruta                      VARCHAR2(20) not null
-);
-ALTER TABLE TATTO ADD(
-      CONSTRAINT PK_TATOO PRIMARY KEY (CODIGO)
-)
+       ruta                      VARCHAR2(40),
+       MEMBER PROCEDURE mostrar);
+
+--CUERPO DEL OBJETO
+CREATE OR REPLACE TYPE BODY OBJECT_TATOO AS
+  MEMBER PROCEDURE mostrar IS
+  BEGIN
+    DBMS_OUTPUT.PUT_LINE('Código: ' || codigo || ' - ' || 'nombre: ' || nombre ||' - ' || 'descripción: ' || descripcion);
+  END;
+END;
+
+--TABLA CREADA A PARTIR DEL OBJETO INDICANDO LA LLAVE PRIMARIA
+CREATE TABLE TATOOS of OBJECT_TATOO (PRIMARY KEY (codigo));; 
+--INSERCIONES EN LA TABLA
+INSERT INTO TATOOS VALUES(OBJECT_TATOO (1, 'Calavera', 'Calavera blanca en llamas','C://tatoos//calavera.png')); 
+INSERT INTO TATOOS VALUES(OBJECT_TATOO (2, 'Dragon', 'Dragon estilo oriental','C://tatoos//dragon.png'));
+--BLOQUE ANONIMO PARA LLAMAR EL METODO "MOSTRAR" DEL OBJETO
+DECLARE
+  mi_tatoo OBJECT_TATOO;
+BEGIN
+  SELECT VALUE(t) INTO mi_tatoo FROM TATOOS t WHERE t.codigo = 1;
+  mi_tatoo.mostrar();
+END;
 
 CREATE OR REPLACE TABLE TATOOARTIST
 (
