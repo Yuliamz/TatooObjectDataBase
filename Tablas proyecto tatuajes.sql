@@ -76,24 +76,44 @@ INSERT INTO TATOOARTISTS VALUES(TIPO_TATOOARTIST (1, 1049645321, 'Pedro Hernande
 --CONSULTA
 SELECT * FROM TATOOARTISTS;
 
+--=================CONTRACT==================
+--ESPECIFICACION DEL OBJETO
+CREATE OR REPLACE TYPE OBJECT_CONTRACT AS OBJECT(
+       idContract                NUMBER,
+       typeContract              VARCHAR2(1),
+       descripcion               VARCHAR2(150),
+       dateInitial               DATE,
+       dateFinish                DATE,
+       MEMBER PROCEDURE mostrar);
+       
+--CUERPO DEL OBJETO
+CREATE OR REPLACE TYPE BODY OBJECT_CONTRACT AS
+  MEMBER PROCEDURE mostrar IS
+  BEGIN
+    DBMS_OUTPUT.PUT_LINE('Código: ' || idContract || ' - ' || 'Tipo de contrato: ' || typeContract ||' - ' || 'descripción: ' || descripcion 
+                                  || 'Fecha de inicio: ' || dateInitial || ' - ' || 'Fecha final: ' || dateFinish);
+  END;
+END;  
+
+--TABLA CREADA A PARTIR DEL OBJETO INDICANDO LA LLAVE PRIMARIA
+CREATE TABLE CONTRACTS of OBJECT_CONTRACT (PRIMARY KEY (idContract),
+CHECK (typeContract IN ('F'/*TERMINO FIJO*/,'I'/*TERMINO INDEFINIDO*/,'S'/*PRESTACION DE SERVICIOS*/)AND typeContract = UPPER(typeContract))); 
+
+--INSERCIONES EN LA TABLA
+INSERT INTO CONTRACTS VALUES(OBJECT_CONTRACT (1, 'F', 'contrato a termino fijo',TO_DATE('2017/01/01','yyyy/mm/dd'), TO_DATE('2020-01-01','yyyy/mm/dd'))); 
+INSERT INTO CONTRACTS VALUES(OBJECT_CONTRACT (2, 'I', 'contrato a termino indefinido',TO_DATE('2017/01/01','yyyy/mm/dd'), NULL)); 
+--BLOQUE ANONIMO PARA LLAMAR EL METODO "MOSTRAR" DEL OBJETO
+DECLARE
+  mi_contract OBJECT_CONTRACT;
+BEGIN
+  SELECT VALUE(t) INTO mi_contract FROM CONTRACTS t WHERE t.idContract = 1;
+  mi_contract.mostrar();
+END;
 
 
 
 
 
-
-CREATE OR REPLACE TABLE CONTRACT
-(
-       CODIGO           NUMBER NOT NULL,
-       FECHA_INICIO     TIMESTAMP NOT NULL,
-       FECHA_FIN        TIMESTAMP,
-       DESCRIPCION      VARCHAR2,
-       TIPO             VARCHAR2(1) default 'F' not null
-)
-ALTER TABLE CONTRACT ADD(
-      CONSTRAINT PK_CONTRACT PRIMARY KEY (CODIGO),
-      CONSTRAINT CKC_TIPO CHECK (TIPO IN ('F'/*FIXED TERM*/,'I'/*INDEFINITE TERM*/,'D'/*DELIVERY SERVICES*/)AND TIPO_DNI = UPPER(TIPO_DNI))
-)
 
 CREATE OR REPLACE TABLE PAYMENT
 (
